@@ -12,18 +12,18 @@ class WiiLZ77:
         self.file.seek(self.offset)
 
         hdr = int.from_bytes(file.read(4), "little")
-        self.uncompressed_length = hdr >> 8
+        self.decompressed_length = hdr >> 8
         self.compression_type = hdr >> 4 & 0xF
 
         if self.compression_type != self.TYPE_LZ77:
             raise ValueError("Unsupported compression method %d" % self.compression_type)
 
-    def uncompress(self):
+    def decompress(self):
         dout = ""
 
         self.file.seek(self.offset + 0x4)
 
-        while len(dout) < self.uncompressed_length:
+        while len(dout) < self.decompressed_length:
             flags = int.from_bytes(self.file.read(1), "little")
 
             for i in range(8):
@@ -35,12 +35,12 @@ class WiiLZ77:
                     for ii in range(num):
                         dout += dout[ptr]
                         ptr += 1
-                        if len(dout) >= self.uncompressed_length:
+                        if len(dout) >= self.decompressed_length:
                             break
                 else:
                     dout += self.file.read(1).decode("unicode_escape")
                 flags <<= 1
-                if len(dout) >= self.uncompressed_length:
+                if len(dout) >= self.decompressed_length:
                     break
 
         self.data = dout
@@ -62,10 +62,10 @@ with open(sys.argv[1], "rb") as file:
 
     file_data = WiiLZ77(file, file.tell())
 
-    uncompressed_data = file_data.uncompress()
+    decompressed_data = file_data.decompress()
 
     with open(sys.argv[2], "w") as out_file:
-        out_file.write(uncompressed_data)
+        out_file.write(decompressed_data)
         out_file.close()
 
     file.close()
