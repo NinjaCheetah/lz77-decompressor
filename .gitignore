@@ -1,6 +1,6 @@
 .env
-.idea
-venv
+.idea/
+venv/
 __pycache__
 config.json
 counters.json
@@ -8,3 +8,4 @@ devcounters.json
 counters.db
 counters.db-*
 bot.log
+*.html
